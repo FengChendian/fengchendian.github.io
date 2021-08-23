@@ -21,10 +21,19 @@ title: 关于
 
 ## 个人简介
 
-南京大学物理学院学生一枚，除了物理学什么都有喜欢。
+南京大学物理学院学生一枚，除了物理学什么都喜欢。
 
 ## 教育经历
 
 - 2017~2021 南京大学 物理学院 本科
 - 2021~至今  南京大学 物理学院 博士
 
+## 参与过的论文
+
+- Scalable massively parallel computing using continuous-time data representation in nanoscale crossbar array.  
+  <div>
+  <font style="color: green">Nature Nanotechnology. (2021) 
+  <a href="https://doi.org/10.1038/s41565-021-00943-y" style="color:green">https://doi.org/10.1038/s41565-021-00943-y
+  </a>
+  </font>
+  </div>
