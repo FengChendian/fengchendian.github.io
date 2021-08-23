@@ -4,7 +4,7 @@ title: 串口通信 - 同步模式
 tags: [SerialPort, 串口]
 show_subscribe: false
 cover: assets/images/windows.png
-key: serial_port_sync
+key: page-serial-port-sync
 ---
 
 使用C++/C在Windows上进行串口通信的方法。
