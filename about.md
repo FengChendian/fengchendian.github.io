@@ -16,10 +16,15 @@ titles:
   ko      : &KO       소개
   ko-KR   : *KO
 key: page-about
+title: 关于
 ---
 
-Just say something about yourself. :+1:
+## 个人简介
 
-{% highlight javascript %}
-(() => console.log('hello, world!'))();
-{% endhighlight %}
+南京大学物理学院学生一枚，除了物理学什么都有喜欢。
+
+## 教育经历
+
+- 2017~2021 南京大学 物理学院 本科
+- 2021~至今  南京大学 物理学院 博士
+
