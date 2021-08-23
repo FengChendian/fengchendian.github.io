@@ -118,7 +118,7 @@ sharing:
 ## => Comments
 ##############################
 comments:
-  provider: false # false (default), "disqus", "gitalk", "valine", "custom"
+  provider: gitalk # false (default), "disqus", "gitalk", "valine", "custom"
 
   ## Disqus
   disqus:
@@ -127,12 +127,12 @@ comments:
   ## Gitalk
   # please refer to https://github.com/gitalk/gitalk for more info.
   gitalk:
-    clientID    : # GitHub Application Client ID
-    clientSecret: # GitHub Application Client Secret
-    repository  : # GitHub repo
-    owner       : # GitHub repo owner
+    clientID    : ff451710b275933753ec # GitHub Application Client ID
+    clientSecret: 751a7ccb9a791e12fd7a24b3ffe087c83b302744 # GitHub Application Client Secret
+    repository  : https://github.com/FengChendian/blog_comments # GitHub repo
+    owner       : FengChendian # GitHub repo owner
     admin: # GitHub repo owner and collaborators, only these guys can initialize GitHub issues, IT IS A LIST.
-      # - your GitHub Id
+      - FengChendian
 
   ## Valine
   # please refer to https://valine.js.org/en/ for more info.
