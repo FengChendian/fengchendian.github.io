@@ -19,24 +19,57 @@ const years = [...postsByYear.keys()].sort((a, b) => b - a);
 
 <BaseLayout title="归档 - Yichen's Homepage" description="全部文章归档">
 	<h2 class="section-title mt-10 mb-2">archive</h2>
-	<p class="mono text-muted mb-8 text-xs">共 {posts.length} 篇文章</p>
+	<p class="mono text-muted mb-6 text-xs">
+		<span id="archive-count">共 {posts.length} 篇文章</span>
+	</p>
+
+	<div class="relative mb-10">
+		<div class="card flex items-center gap-3 px-5 py-3">
+			<span class="mono accent select-none text-sm" aria-hidden="true">&gt;</span>
+			<input
+				id="archive-search"
+				type="search"
+				class="w-full bg-transparent text-sm outline-none placeholder:text-[var(--text-dim)]"
+				style="color: var(--text);"
+				placeholder="搜索标题 / 内容，多个关键词用空格分隔；输入 # 可联想标签"
+				autocomplete="off"
+				spellcheck="false"
+			/>
+		</div>
+		<div
+			id="tag-suggest"
+			class="card absolute inset-x-0 top-full z-20 mt-2 hidden max-h-64 overflow-y-auto p-1"
+			role="listbox"
+			aria-label="标签联想"
+		></div>
+	</div>
+
 	{
 		years.map((year) => (
-			<section class="mb-10">
+			<section class="mb-10" data-year={year}>
 				<h3 class="mono accent mb-4 text-lg font-bold">{year}</h3>
 				<ul class="flex flex-col gap-3">
 					{postsByYear.get(year)!.map((post) => (
-						<li>
+						<li data-post-id={post.id}>
 							<a
 								href={`/blog/${post.id}/`}
-								class="card card-hover flex items-baseline justify-between gap-4 px-6 py-4 no-underline"
+								class="card card-hover block px-6 py-4 no-underline"
 							>
-								<span class="font-medium" style="color: var(--text)">
-									{post.data.title}
-								</span>
-								<span class="mono text-muted shrink-0 text-xs">
-									<FormattedDate date={post.data.pubDate} />
-								</span>
+								<div class="flex items-baseline justify-between gap-4">
+									<span class="font-medium" style="color: var(--text)">
+										{post.data.title}
+									</span>
+									<span class="mono text-muted shrink-0 text-xs">
+										<FormattedDate date={post.data.pubDate} />
+									</span>
+								</div>
+								{post.data.tags.length > 0 && (
+									<div class="mt-2.5 flex flex-wrap gap-2">
+										{post.data.tags.map((tag) => (
+											<span class="tag-pill">#{tag}</span>
+										))}
+									</div>
+								)}
 							</a>
 						</li>
 					))}
@@ -44,4 +77,243 @@ const years = [...postsByYear.keys()].sort((a, b) => b - a);
 			</section>
 		))
 	}
+	<p id="archive-empty" class="mono text-muted hidden text-sm">没有匹配的文章</p>
+
+	<script is:inline>
+		(() => {
+			const input = document.getElementById('archive-search');
+			const countEl = document.getElementById('archive-count');
+			const emptyEl = document.getElementById('archive-empty');
+			const suggestEl = document.getElementById('tag-suggest');
+			if (!input || !countEl || !emptyEl || !suggestEl) return;
+
+			const items = [...document.querySelectorAll('[data-post-id]')];
+			const sections = [...document.querySelectorAll('[data-year]')];
+			const total = items.length;
+
+			// 标签直接读列表中已渲染的 .tag-pill，无需内联数据
+			const tagMap = new Map();
+			for (const li of items) {
+				tagMap.set(
+					li.dataset.postId,
+					[...li.querySelectorAll('.tag-pill')].map((el) =>
+						el.textContent.replace(/^#/, ''),
+					),
+				);
+			}
+
+			// Pagefind 索引由构建期生成；dev 模式下不存在，此时退化为仅按标签过滤
+			let pagefind = null;
+			import('/pagefind/pagefind.js')
+				.then((pf) => (typeof pf.init === 'function' ? pf.init().then(() => pf) : pf))
+				.then((pf) => {
+					pagefind = pf;
+				})
+				.catch(() => {});
+
+			let searchSeq = 0;
+			const applyFilter = async () => {
+				const tokens = input.value.trim().split(/\s+/).filter(Boolean);
+				// #标签 仍走本地子串匹配（标签量小，且支持模糊输入）；多个 #标签 之间为与关系
+				const tagTokens = tokens
+					.filter((t) => t.startsWith('#'))
+					.map((t) => t.slice(1).toLowerCase())
+					.filter(Boolean);
+				// 其余 token 交给 Pagefind 全文检索（多词为与关系，中文按词切分）
+				const textTokens = tokens.filter((t) => !t.startsWith('#'));
+
+				let textMatch = null;
+				let degraded = false;
+				if (textTokens.length > 0) {
+					if (pagefind) {
+						const seq = ++searchSeq;
+						let datas;
+						try {
+							const res = await pagefind.search(textTokens.join(' '));
+							if (seq !== searchSeq) return; // 已有更新的查询，丢弃过期结果
+							datas = await Promise.all(res.results.map((r) => r.data()));
+							if (seq !== searchSeq) return;
+						} catch {
+							// 索引加载失败等异常：退化为仅按标签过滤
+							degraded = true;
+						}
+						if (datas) {
+							textMatch = new Set(
+								datas
+									.map((d) => /^\/blog\/(.+?)\/?$/.exec(d.url)?.[1])
+									.filter(Boolean),
+							);
+						}
+					} else {
+						degraded = true;
+					}
+				}
+
+				const visible = new Set();
+				for (const li of items) {
+					const id = li.dataset.postId;
+					const tags = tagMap.get(id).map((t) => t.toLowerCase());
+					const okText = !textMatch || textMatch.has(id);
+					const okTags = tagTokens.every((q) => tags.some((t) => t.includes(q)));
+					if (okText && okTags) visible.add(id);
+				}
+				for (const li of items) {
+					li.classList.toggle('hidden', !visible.has(li.dataset.postId));
+				}
+				for (const section of sections) {
+					const anyVisible = [...section.querySelectorAll('[data-post-id]')].some(
+						(li) => !li.classList.contains('hidden'),
+					);
+					section.classList.toggle('hidden', !anyVisible);
+				}
+				countEl.textContent =
+					tokens.length === 0
+						? `共 ${total} 篇文章`
+						: `匹配 ${visible.size} / ${total} 篇文章` +
+							(degraded ? '（dev 模式无全文索引，请先运行 npm run build）' : '');
+				emptyEl.classList.toggle('hidden', visible.size > 0);
+			};
+
+			// ---------- # 标签联想 ----------
+
+			// 全部标签及文章数
+			const tagCounts = new Map();
+			for (const tags of tagMap.values()) {
+				for (const tag of tags) {
+					tagCounts.set(tag, (tagCounts.get(tag) ?? 0) + 1);
+				}
+			}
+
+			let suggestions = [];
+			let activeIndex = -1;
+
+			// 光标所在的 token（以空白分隔），仅当它以 # 开头时才联想
+			const activeToken = () => {
+				const value = input.value;
+				const cursor = input.selectionStart ?? value.length;
+				let start = cursor;
+				while (start > 0 && !/\s/.test(value[start - 1])) start--;
+				let end = cursor;
+				while (end < value.length && !/\s/.test(value[end])) end++;
+				const token = value.slice(start, cursor);
+				if (!token.startsWith('#')) return null;
+				return { start, end, query: token.slice(1) };
+			};
+
+			const closeSuggest = () => {
+				suggestEl.classList.add('hidden');
+				suggestions = [];
+				activeIndex = -1;
+			};
+
+			const setActive = (index) => {
+				activeIndex = (index + suggestions.length) % suggestions.length;
+				[...suggestEl.children].forEach((el, i) => {
+					el.classList.toggle('is-active', i === activeIndex);
+				});
+				suggestEl.children[activeIndex]?.scrollIntoView({ block: 'nearest' });
+			};
+
+			const pick = (index) => {
+				const ctx = activeToken();
+				if (!ctx || !suggestions[index]) return;
+				const next = `${input.value.slice(0, ctx.start)}#${suggestions[index].tag} `;
+				input.value = next + input.value.slice(ctx.end);
+				input.setSelectionRange(next.length, next.length);
+				closeSuggest();
+				applyFilter();
+			};
+
+			const buildItem = ({ tag, count }, index, query) => {
+				const btn = document.createElement('button');
+				btn.type = 'button';
+				btn.className = 'tag-suggest-item';
+				btn.setAttribute('role', 'option');
+				const label = document.createElement('span');
+				label.className = 'mono';
+				label.append('#');
+				const pos = tag.toLowerCase().indexOf(query);
+				if (query && pos >= 0) {
+					// 高亮命中的子串
+					const hit = document.createElement('span');
+					hit.className = 'accent font-bold';
+					hit.textContent = tag.slice(pos, pos + query.length);
+					label.append(tag.slice(0, pos), hit, tag.slice(pos + query.length));
+				} else {
+					label.append(tag);
+				}
+				const badge = document.createElement('span');
+				badge.className = 'mono text-muted shrink-0 text-xs';
+				badge.textContent = `${count} 篇`;
+				btn.append(label, badge);
+				// 用 mousedown + preventDefault，避免点击时输入框失焦
+				btn.addEventListener('mousedown', (e) => {
+					e.preventDefault();
+					pick(index);
+				});
+				return btn;
+			};
+
+			const renderSuggest = () => {
+				const ctx = activeToken();
+				if (!ctx) {
+					closeSuggest();
+					return;
+				}
+				const q = ctx.query.toLowerCase();
+				suggestions = [...tagCounts.entries()]
+					.filter(([tag]) => tag.toLowerCase().includes(q))
+					.sort(
+						(a, b) =>
+							Number(b[0].toLowerCase().startsWith(q)) -
+								Number(a[0].toLowerCase().startsWith(q)) ||
+							b[1] - a[1] ||
+							a[0].localeCompare(b[0]),
+					)
+					.slice(0, 8)
+					.map(([tag, count]) => ({ tag, count }));
+				// 已精确输入完整标签且只剩它一个候选时，不再打扰
+				if (
+					suggestions.length === 0 ||
+					(suggestions.length === 1 && suggestions[0].tag.toLowerCase() === q)
+				) {
+					closeSuggest();
+					return;
+				}
+				suggestEl.replaceChildren(...suggestions.map((s, i) => buildItem(s, i, q)));
+				suggestEl.classList.remove('hidden');
+				setActive(0);
+			};
+
+			let debounceTimer;
+			input.addEventListener('input', () => {
+				renderSuggest();
+				clearTimeout(debounceTimer);
+				debounceTimer = setTimeout(applyFilter, 150);
+			});
+			// 光标水平移动（点击、左右方向键、Home/End）时同步联想状态；
+			// 上下方向键留给下拉框导航，不触发重建
+			input.addEventListener('click', renderSuggest);
+			input.addEventListener('keyup', (e) => {
+				if (['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(e.key)) renderSuggest();
+			});
+			input.addEventListener('blur', closeSuggest);
+
+			input.addEventListener('keydown', (e) => {
+				if (suggestEl.classList.contains('hidden')) return;
+				if (e.key === 'ArrowDown') {
+					e.preventDefault();
+					setActive(activeIndex + 1);
+				} else if (e.key === 'ArrowUp') {
+					e.preventDefault();
+					setActive(activeIndex - 1);
+				} else if (e.key === 'Enter' || e.key === 'Tab') {
+					e.preventDefault();
+					pick(activeIndex);
+				} else if (e.key === 'Escape') {
+					closeSuggest();
+				}
+			});
+		})();
+	</script>
 </BaseLayout>
