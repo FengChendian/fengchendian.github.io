@@ -3,74 +3,53 @@ import type { MarkdownHeading } from 'astro';
 import type { CollectionEntry } from 'astro:content';
 import Comments from '../components/Comments.astro';
 import FormattedDate from '../components/FormattedDate.astro';
+import TocFloat from '../components/TocFloat.astro';
 import BaseLayout from './BaseLayout.astro';
 
 type Props = CollectionEntry<'blog'>['data'] & { headings?: MarkdownHeading[] };
 
 const { title, description, pubDate, updatedDate, heroImage, tags, headings = [] } = Astro.props;
-const toc = headings.filter((h) => h.depth >= 2 && h.depth <= 3);
 ---
 
-<BaseLayout title={`${title} - Yichen's Homepage`} description={description} image={heroImage} wide>
-	<div class="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_16rem]">
-		<div class="min-w-0">
-			<article class="glass overflow-hidden">
-				{
-					heroImage && (
-						<div class="border-b border-white/20 px-6 pt-8 pb-2 dark:border-white/10">
-							<img src={heroImage} alt="" class="mx-auto h-auto max-h-72 w-auto" />
-						</div>
-					)
-				}
-				<div class="p-6 sm:p-10">
-					<header class="mb-8 border-b border-white/20 pb-6 dark:border-white/10">
-						<h1 class="mb-3 text-3xl font-bold tracking-tight">{title}</h1>
-						<div class="text-muted flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
-							<FormattedDate date={pubDate} />
-							{
-								updatedDate && (
-									<span class="italic">
-										更新于 <FormattedDate date={updatedDate} />
-									</span>
-								)
-							}
-							{
-								tags.length > 0 && (
-									<span class="flex flex-wrap gap-2">
-										{tags.map((tag) => (
-											<span class="rounded-full border border-white/30 px-2.5 py-0.5 text-xs dark:border-white/15">
-												{tag}
-											</span>
-										))}
-									</span>
-								)
-							}
-						</div>
-					</header>
-					<div class="prose dark:prose-invert max-w-none prose-pre:bg-transparent prose-pre:p-0">
-						<slot />
-					</div>
-				</div>
-			</article>
-			<Comments />
-		</div>
+<BaseLayout title={`${title} - Yichen's Homepage`} description={description} image={heroImage}>
+	<article class="glass overflow-hidden">
 		{
-			toc.length > 0 && (
-				<aside class="hidden lg:block">
-					<nav class="glass sticky top-24 p-5 text-sm">
-						<p class="mb-3 font-bold">目录</p>
-						<ul class="flex flex-col gap-2">
-							{toc.map((h) => (
-								<li class={h.depth === 3 ? 'pl-4' : ''}>
-									<a href={`#${h.slug}`} class="text-muted no-underline transition-colors hover:text-[var(--accent)]">
-										{h.text}
-									</a>
-								</li>
-							))}
-						</ul>
-					</nav>
-				</aside>
+			heroImage && (
+				<div class="border-b border-white/20 px-6 pt-8 pb-2 dark:border-white/10">
+					<img src={heroImage} alt="" class="mx-auto h-auto max-h-72 w-auto" />
+				</div>
 			)
 		}
-	</div>
+		<div class="p-6 sm:p-10">
+			<header class="mb-8 border-b border-white/20 pb-6 dark:border-white/10">
+				<h1 class="mb-3 text-3xl font-bold tracking-tight">{title}</h1>
+				<div class="text-muted flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
+					<FormattedDate date={pubDate} />
+					{
+						updatedDate && (
+							<span class="italic">
+								更新于 <FormattedDate date={updatedDate} />
+							</span>
+						)
+					}
+					{
+						tags.length > 0 && (
+							<span class="flex flex-wrap gap-2">
+								{tags.map((tag) => (
+									<span class="rounded-full border border-white/30 px-2.5 py-0.5 text-xs dark:border-white/15">
+										{tag}
+									</span>
+								))}
+							</span>
+						)
+					}
+				</div>
+			</header>
+			<div class="prose dark:prose-invert max-w-none prose-pre:bg-transparent prose-pre:p-0">
+				<slot />
+			</div>
+		</div>
+	</article>
+	<Comments />
+	<TocFloat headings={headings} />
 </BaseLayout>

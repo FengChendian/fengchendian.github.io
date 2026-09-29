@@ -1,0 +1,133 @@
+---
+import type { MarkdownHeading } from 'astro';
+
+interface Props {
+	headings: MarkdownHeading[];
+}
+
+const { headings } = Astro.props;
+const toc = headings.filter((h) => h.depth >= 2 && h.depth <= 3);
+---
+
+{
+	toc.length > 0 && (
+		<div id="toc-float" class="toc-float">
+			<nav class="toc-panel glass" aria-label="文章目录">
+				<p class="mb-3 text-sm font-bold">目录</p>
+				<ul class="flex flex-col gap-2 text-sm">
+					{toc.map((h) => (
+						<li class={h.depth === 3 ? 'pl-4' : ''}>
+							<a href={`#${h.slug}`} class="text-muted no-underline transition-colors hover:text-[var(--accent)]">
+								{h.text}
+							</a>
+						</li>
+					))}
+				</ul>
+			</nav>
+			<button type="button" class="toc-btn glass-strong" aria-label="展开目录" aria-expanded="false">
+				<svg
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="2"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					class="h-5 w-5"
+					aria-hidden="true"
+				>
+					<line x1="8" y1="6" x2="21" y2="6" />
+					<line x1="8" y1="12" x2="21" y2="12" />
+					<line x1="8" y1="18" x2="21" y2="18" />
+					<line x1="3" y1="6" x2="3.01" y2="6" />
+					<line x1="3" y1="12" x2="3.01" y2="12" />
+					<line x1="3" y1="18" x2="3.01" y2="18" />
+				</svg>
+			</button>
+		</div>
+	)
+}
+
+<style>
+	.toc-float {
+		position: fixed;
+		right: 1.25rem;
+		bottom: 1.25rem;
+		z-index: 50;
+		display: flex;
+		flex-direction: column;
+		align-items: flex-end;
+		gap: 0.75rem;
+	}
+
+	.toc-btn {
+		display: flex;
+		height: 2.75rem;
+		width: 2.75rem;
+		align-items: center;
+		justify-content: center;
+		cursor: pointer;
+		transition: transform 0.25s ease;
+	}
+
+	.toc-btn:hover {
+		transform: translateY(-2px);
+	}
+
+	.toc-panel {
+		width: 16rem;
+		max-height: 60vh;
+		overflow-y: auto;
+		padding: 1.25rem;
+		opacity: 0;
+		transform: scale(0.85) translateY(8px);
+		transform-origin: bottom right;
+		pointer-events: none;
+		transition:
+			opacity 0.25s ease,
+			transform 0.25s ease;
+	}
+
+	.toc-float.open .toc-panel {
+		opacity: 1;
+		transform: none;
+		pointer-events: auto;
+	}
+
+	.toc-float.open .toc-btn {
+		transform: scale(0.92);
+	}
+
+	/* 桌面端悬停展开 */
+	@media (hover: hover) {
+		.toc-float:hover .toc-panel {
+			opacity: 1;
+			transform: none;
+			pointer-events: auto;
+		}
+	}
+</style>
+
+<script>
+	const wrap = document.getElementById('toc-float');
+	const btn = wrap?.querySelector('.toc-btn');
+
+	btn?.addEventListener('click', (e) => {
+		e.stopPropagation();
+		const open = wrap!.classList.toggle('open');
+		btn.setAttribute('aria-expanded', String(open));
+	});
+
+	document.addEventListener('click', (e) => {
+		if (wrap && !wrap.contains(e.target as Node)) {
+			wrap.classList.remove('open');
+			btn?.setAttribute('aria-expanded', 'false');
+		}
+	});
+
+	wrap?.querySelectorAll('.toc-panel a').forEach((a) =>
+		a.addEventListener('click', () => {
+			wrap.classList.remove('open');
+			btn?.setAttribute('aria-expanded', 'false');
+		}),
+	);
+</script>
