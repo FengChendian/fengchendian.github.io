@@ -25,7 +25,9 @@ const posts = (await getCollection('blog')).sort(
 					<li>
 						<a href={`/blog/${post.id}/`} class="glass glass-hover block overflow-hidden no-underline">
 							{post.data.heroImage && (
-								<img src={post.data.heroImage} alt="" class="h-44 w-full object-cover" loading="lazy" />
+								<div class="card-thumb">
+									<img src={post.data.heroImage} alt="" loading="lazy" />
+								</div>
 							)}
 							<div class="p-5">
 								<h3 class="mb-1 text-lg font-bold" style="color: var(--text)">

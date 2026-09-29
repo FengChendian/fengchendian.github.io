@@ -147,6 +147,27 @@ pre.astro-code {
 	overflow-x: auto;
 }
 
+/* 文章卡片缩略图：保持原始比例，空缺处以渐变底色填充 */
+.card-thumb {
+	display: flex;
+	height: 11rem;
+	align-items: center;
+	justify-content: center;
+	background: linear-gradient(135deg, rgba(99, 179, 237, 0.2), rgba(192, 132, 252, 0.16));
+}
+
+.dark .card-thumb {
+	background: linear-gradient(135deg, rgba(56, 89, 199, 0.25), rgba(124, 58, 237, 0.2));
+}
+
+.card-thumb img {
+	max-width: 100%;
+	max-height: 100%;
+	width: auto;
+	height: auto;
+	object-fit: contain;
+}
+
 /* Gitalk 暗色模式覆盖 */
 .dark #gitalk-container {
 	color: var(--text);
