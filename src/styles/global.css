@@ -39,6 +39,7 @@ html {
 		'Microsoft YaHei',
 		sans-serif;
 	scroll-behavior: smooth;
+	scroll-padding-top: 6rem;
 }
 
 body {

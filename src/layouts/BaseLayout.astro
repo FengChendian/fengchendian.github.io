@@ -20,7 +20,7 @@ const { title, description, image, wide = false } = Astro.props;
 	</head>
 	<body class="flex min-h-screen flex-col">
 		<Header />
-		<main class:list={['mx-auto w-full flex-1 px-4 pt-24 pb-14 sm:pt-28', wide ? 'max-w-5xl' : 'max-w-3xl']}>
+		<main class:list={['mx-auto w-full flex-1 px-4 pt-24 pb-14 sm:pt-28', wide ? 'max-w-6xl' : 'max-w-4xl']}>
 			<slot />
 		</main>
 		<Footer />
