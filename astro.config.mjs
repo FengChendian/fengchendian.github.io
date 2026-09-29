@@ -4,6 +4,8 @@ import sitemap from '@astrojs/sitemap';
 import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'astro/config';
 import rehypeCallouts from 'rehype-callouts';
+import rehypeKatex from 'rehype-katex';
+import remarkMath from 'remark-math';
 
 // https://astro.build/config
 export default defineConfig({
@@ -13,7 +15,8 @@ export default defineConfig({
 		plugins: [tailwindcss()],
 	},
 	markdown: {
-		rehypePlugins: [rehypeCallouts],
+		remarkPlugins: [remarkMath],
+		rehypePlugins: [rehypeKatex, rehypeCallouts],
 		shikiConfig: {
 			themes: {
 				light: 'github-light',
