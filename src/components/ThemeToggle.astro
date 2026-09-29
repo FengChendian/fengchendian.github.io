@@ -1,45 +1,34 @@
-<button
-	id="theme-toggle"
-	type="button"
-	aria-label="切换日间/夜间模式"
-	class="flex h-9 w-9 items-center justify-center rounded-full text-sm transition-colors hover:bg-white/20 dark:hover:bg-white/10"
->
-	<svg
-		class="icon-sun h-5 w-5"
-		viewBox="0 0 24 24"
-		fill="none"
-		stroke="currentColor"
-		stroke-width="2"
-		stroke-linecap="round"
-		stroke-linejoin="round"
-		aria-hidden="true"
-	>
-		<circle cx="12" cy="12" r="4"></circle>
-		<path d="M12 2v2"></path><path d="M12 20v2"></path>
-		<path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path>
-		<path d="M2 12h2"></path><path d="M20 12h2"></path>
-		<path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path>
-	</svg>
-	<svg
-		class="icon-moon hidden h-5 w-5"
-		viewBox="0 0 24 24"
-		fill="none"
-		stroke="currentColor"
-		stroke-width="2"
-		stroke-linecap="round"
-		stroke-linejoin="round"
-		aria-hidden="true"
-	>
-		<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
-	</svg>
+<button id="theme-toggle" type="button" aria-label="切换日间/夜间模式">
+	<span class="knob"></span>
 </button>
 
 <style>
-	:global(.dark) .icon-sun {
-		display: none;
+	#theme-toggle {
+		background: var(--bg-soft);
+		border: 1px solid var(--card-border);
+		border-radius: 999px;
+		width: 52px;
+		height: 28px;
+		cursor: pointer;
+		position: relative;
+		transition: background 0.3s;
+		flex-shrink: 0;
 	}
-	:global(.dark) .icon-moon {
-		display: block;
+
+	#theme-toggle .knob {
+		position: absolute;
+		top: 3px;
+		left: 4px;
+		width: 20px;
+		height: 20px;
+		border-radius: 50%;
+		background: linear-gradient(135deg, var(--accent), var(--accent-2));
+		box-shadow: 0 0 10px var(--accent-glow);
+		transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+	}
+
+	:global(.dark) #theme-toggle .knob {
+		transform: translateX(23px);
 	}
 </style>
 

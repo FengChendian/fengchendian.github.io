@@ -12,8 +12,8 @@ const toc = headings.filter((h) => h.depth >= 2 && h.depth <= 3);
 {
 	toc.length > 0 && (
 		<div id="toc-float" class="toc-float">
-			<nav class="toc-panel glass" aria-label="文章目录">
-				<p class="mb-3 text-sm font-bold">目录</p>
+			<nav class="toc-panel card" aria-label="文章目录">
+				<p class="mono mb-3 text-[13px] font-bold tracking-widest uppercase" style="color: var(--text-dim)">// 目录</p>
 				<ul class="flex flex-col gap-2 text-sm">
 					{toc.map((h) => (
 						<li class={h.depth === 3 ? 'pl-4' : ''}>
@@ -24,7 +24,7 @@ const toc = headings.filter((h) => h.depth >= 2 && h.depth <= 3);
 					))}
 				</ul>
 			</nav>
-			<button type="button" class="toc-btn glass-strong" aria-label="展开目录" aria-expanded="false">
+			<button type="button" class="toc-btn card" aria-label="展开目录" aria-expanded="false">
 				<svg
 					viewBox="0 0 24 24"
 					fill="none"
@@ -66,6 +66,8 @@ const toc = headings.filter((h) => h.depth >= 2 && h.depth <= 3);
 		align-items: center;
 		justify-content: center;
 		cursor: pointer;
+		border-radius: 9999px;
+		color: var(--text);
 		transition: transform 0.25s ease;
 	}
 

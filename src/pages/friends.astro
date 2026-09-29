@@ -12,12 +12,12 @@ const friends = [
 ---
 
 <BaseLayout title="友链 - Yichen's Homepage" description="友情链接">
-	<h1 class="mb-8 text-3xl font-bold">友链</h1>
-	<ul class="grid gap-5 sm:grid-cols-2">
+	<h2 class="section-title mt-10 mb-6">friends</h2>
+	<ul class="grid gap-4 sm:grid-cols-2">
 		{
 			friends.map((friend) => (
 				<li>
-					<a href={friend.url} target="_blank" rel="noopener noreferrer" class="glass glass-hover flex items-center gap-4 p-5 no-underline">
+					<a href={friend.url} target="_blank" rel="noopener noreferrer" class="card card-hover flex items-center gap-4 p-5 no-underline">
 						<img src={friend.avatar} alt={friend.name} class="h-14 w-14 rounded-full object-cover" loading="lazy" />
 						<div>
 							<h2 class="text-base font-bold" style="color: var(--text)">

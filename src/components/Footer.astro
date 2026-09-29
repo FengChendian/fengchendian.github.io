@@ -1,14 +1,17 @@
 ---
-import { AUTHOR, GITHUB_URL, SITE_TITLE } from '../consts';
+import { AUTHOR, GITHUB_URL } from '../consts';
 
 const today = new Date();
 ---
 
-<footer class="flex justify-center px-3 pb-6">
-	<div class="glass flex flex-wrap items-center justify-center gap-x-4 gap-y-1 px-6 py-3 text-sm text-muted">
-		<span>&copy; {today.getFullYear()} {AUTHOR} · {SITE_TITLE}</span>
-		<a href={GITHUB_URL} target="_blank" rel="noopener noreferrer" class="accent hover:underline">GitHub</a>
-		<a href="/rss.xml" class="accent hover:underline">RSS</a>
-		<span>Powered by <a href="https://astro.build/" target="_blank" rel="noopener noreferrer" class="accent hover:underline">Astro</a></span>
+<footer class="border-t py-8" style="border-color: var(--card-border);">
+	<div class="mono mx-auto flex max-w-[880px] flex-wrap items-center justify-center gap-x-2 gap-y-1 px-6 text-[12.5px] text-muted">
+		<span>&copy; {today.getFullYear()} {AUTHOR}</span>
+		<span class="opacity-40">·</span>
+		<a href={GITHUB_URL} target="_blank" rel="noopener noreferrer" class="hover:underline">GitHub</a>
+		<span class="opacity-40">·</span>
+		<a href="/rss.xml" class="hover:underline">RSS</a>
+		<span class="opacity-40">·</span>
+		<span>built with <a href="https://astro.build/" target="_blank" rel="noopener noreferrer" class="hover:underline">Astro</a></span>
 	</div>
 </footer>

@@ -3,7 +3,7 @@ title: 串口通信 - 同步模式
 description: 使用 C++/C 在 Windows 上进行串口通信的方法。
 pubDate: 2021-08-23
 tags: [SerialPort, 串口]
-heroImage: /images/windows.png
+heroImage: windows.png
 ---
 
 使用C++/C在Windows上进行串口通信的方法。

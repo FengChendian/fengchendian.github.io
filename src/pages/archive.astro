@@ -18,23 +18,23 @@ const years = [...postsByYear.keys()].sort((a, b) => b - a);
 ---
 
 <BaseLayout title="归档 - Yichen's Homepage" description="全部文章归档">
-	<h1 class="mb-6 text-3xl font-bold">归档</h1>
-	<p class="text-muted mb-8">共 {posts.length} 篇文章</p>
+	<h2 class="section-title mt-10 mb-2">archive</h2>
+	<p class="mono text-muted mb-8 text-xs">共 {posts.length} 篇文章</p>
 	{
 		years.map((year) => (
-			<section class="mb-8">
-				<h2 class="mb-3 text-xl font-bold accent">{year}</h2>
+			<section class="mb-10">
+				<h3 class="mono accent mb-4 text-lg font-bold">{year}</h3>
 				<ul class="flex flex-col gap-3">
 					{postsByYear.get(year)!.map((post) => (
 						<li>
 							<a
 								href={`/blog/${post.id}/`}
-								class="glass glass-hover flex items-baseline justify-between gap-4 px-5 py-3.5 no-underline"
+								class="card card-hover flex items-baseline justify-between gap-4 px-6 py-4 no-underline"
 							>
 								<span class="font-medium" style="color: var(--text)">
 									{post.data.title}
 								</span>
-								<span class="text-muted shrink-0 text-sm">
+								<span class="mono text-muted shrink-0 text-xs">
 									<FormattedDate date={post.data.pubDate} />
 								</span>
 							</a>
