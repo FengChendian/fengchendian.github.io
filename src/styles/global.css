@@ -324,6 +324,83 @@ a {
 	border-radius: 999px;
 }
 
+/* 学术档案徽章组：成排药丸，悬停点亮各自品牌色（.prose a 选择器以提高优先级） */
+/* 与「个人简介」标题同行：标题居左、徽章居右，窄屏自动折行 */
+.about-profile-header {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.5rem 1rem;
+}
+
+/* 抵消 prose 给 h2 的上下外边距，保证同行垂直居中对齐 */
+.about-profile-header h2 {
+	margin: 0;
+}
+
+.profile-links {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 10px;
+}
+
+.prose a.profile-badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 7px;
+	padding: 5px 14px 5px 6px;
+	border: 1px solid var(--card-border);
+	border-radius: 999px;
+	background: var(--card);
+	color: var(--text);
+	font-size: 13px;
+	font-weight: 400;
+	line-height: 1.5;
+	text-decoration: none;
+	box-shadow: var(--shadow);
+	transition:
+		transform 0.25s ease,
+		border-color 0.25s ease,
+		box-shadow 0.25s ease;
+}
+
+.prose a.profile-badge:hover {
+	transform: translateY(-2px);
+	color: var(--text);
+	text-decoration: none;
+}
+
+.prose a.profile-badge--orcid:hover {
+	border-color: #a6ce39;
+	box-shadow: 0 6px 20px rgba(166, 206, 57, 0.25);
+}
+
+.prose a.profile-badge--scholar:hover {
+	border-color: #4285f4;
+	box-shadow: 0 6px 20px rgba(66, 133, 244, 0.25);
+}
+
+.profile-badge svg {
+	flex-shrink: 0;
+}
+
+.profile-badge-label {
+	font-weight: 500;
+}
+
+.profile-badge-id {
+	color: var(--text-dim);
+	font-size: 12px;
+	letter-spacing: 0.5px;
+	transition: color 0.25s ease;
+}
+
+.profile-badge:hover .profile-badge-id {
+	color: var(--text);
+}
+
 /* 主按钮：填充主题渐变，文字用底色反衬（明暗主题下均保持对比度） */
 .btn-accent {
 	display: inline-block;
