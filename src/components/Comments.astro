@@ -1,0 +1,17 @@
+<!-- Gitalk 评论（客户端加载，复用原 Jekyll 站点的 OAuth App 与 issue 数据） -->
+<div id="gitalk-container" class="glass mt-8 p-4 sm:p-6"></div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1.8.0/dist/gitalk.css" />
+<script is:inline src="https://cdn.jsdelivr.net/npm/gitalk@1.8.0/dist/gitalk.min.js"></script>
+<script is:inline>
+	const gitalk = new Gitalk({
+		clientID: 'ff451710b275933753ec',
+		clientSecret: '751a7ccb9a791e12fd7a24b3ffe087c83b302744',
+		repo: 'fengchendian.github.io',
+		owner: 'FengChendian',
+		admin: ['FengChendian'],
+		id: location.pathname,
+		distractionFreeMode: false,
+	});
+	gitalk.render('gitalk-container');
+</script>

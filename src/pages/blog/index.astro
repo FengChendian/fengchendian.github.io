@@ -1,0 +1,35 @@
+---
+import { getCollection } from 'astro:content';
+import FormattedDate from '../../components/FormattedDate.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const posts = (await getCollection('blog')).sort(
+	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+);
+---
+
+<BaseLayout title="文章 - Yichen's Homepage" description="全部文章">
+	<h1 class="mb-8 text-3xl font-bold">全部文章</h1>
+	<ul class="flex flex-col gap-5">
+		{
+			posts.map((post) => (
+				<li>
+					<a href={`/blog/${post.id}/`} class="glass glass-hover block overflow-hidden no-underline">
+						{post.data.heroImage && (
+							<img src={post.data.heroImage} alt="" class="h-44 w-full object-cover" loading="lazy" />
+						)}
+						<div class="p-5">
+							<h2 class="mb-1 text-lg font-bold" style="color: var(--text)">
+								{post.data.title}
+							</h2>
+							<p class="text-muted mb-2 text-sm">
+								<FormattedDate date={post.data.pubDate} />
+							</p>
+							<p class="text-muted line-clamp-2 text-sm">{post.data.description}</p>
+						</div>
+					</a>
+				</li>
+			))
+		}
+	</ul>
+</BaseLayout>

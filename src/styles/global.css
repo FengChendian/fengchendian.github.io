@@ -1,0 +1,167 @@
+@import 'tailwindcss';
+@plugin '@tailwindcss/typography';
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+	--bg: #eef2f9;
+	--text: #1c2333;
+	--text-muted: #5a6478;
+	--accent: #2563eb;
+	--glass-bg: rgba(255, 255, 255, 0.55);
+	--glass-bg-strong: rgba(255, 255, 255, 0.78);
+	--glass-border: rgba(255, 255, 255, 0.7);
+	--glass-shadow: 0 8px 32px rgba(31, 38, 135, 0.1);
+	--glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.65);
+}
+
+.dark {
+	--bg: #090d18;
+	--text: #e6eaf2;
+	--text-muted: #9aa5b8;
+	--accent: #7aa2ff;
+	--glass-bg: rgba(18, 24, 41, 0.55);
+	--glass-bg-strong: rgba(22, 29, 48, 0.8);
+	--glass-border: rgba(255, 255, 255, 0.12);
+	--glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+	--glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.09);
+	color-scheme: dark;
+}
+
+html {
+	font-family:
+		ui-sans-serif,
+		system-ui,
+		-apple-system,
+		'Segoe UI',
+		Roboto,
+		'PingFang SC',
+		'Hiragino Sans GB',
+		'Microsoft YaHei',
+		sans-serif;
+	scroll-behavior: smooth;
+}
+
+body {
+	background-color: var(--bg);
+	color: var(--text);
+	transition: background-color 0.35s ease;
+}
+
+/* 固定全屏渐变光斑背景 */
+body::before {
+	content: '';
+	position: fixed;
+	inset: 0;
+	z-index: -1;
+	pointer-events: none;
+	background:
+		radial-gradient(42rem 30rem at 12% 8%, rgba(99, 179, 237, 0.38), transparent 60%),
+		radial-gradient(36rem 28rem at 88% 18%, rgba(192, 132, 252, 0.32), transparent 60%),
+		radial-gradient(48rem 36rem at 50% 95%, rgba(251, 191, 136, 0.3), transparent 60%),
+		var(--bg);
+}
+
+.dark body::before {
+	background:
+		radial-gradient(42rem 30rem at 12% 8%, rgba(56, 89, 199, 0.28), transparent 60%),
+		radial-gradient(36rem 28rem at 88% 18%, rgba(124, 58, 237, 0.24), transparent 60%),
+		radial-gradient(48rem 36rem at 50% 95%, rgba(14, 116, 144, 0.22), transparent 60%),
+		var(--bg);
+}
+
+/* Liquid Glass 玻璃拟态 */
+.glass {
+	background: var(--glass-bg);
+	-webkit-backdrop-filter: blur(20px) saturate(180%);
+	backdrop-filter: blur(20px) saturate(180%);
+	border: 1px solid var(--glass-border);
+	box-shadow:
+		var(--glass-shadow),
+		var(--glass-highlight);
+	border-radius: 1.25rem;
+}
+
+.glass-strong {
+	background: var(--glass-bg-strong);
+	-webkit-backdrop-filter: blur(24px) saturate(180%);
+	backdrop-filter: blur(24px) saturate(180%);
+	border: 1px solid var(--glass-border);
+	box-shadow:
+		var(--glass-shadow),
+		var(--glass-highlight);
+	border-radius: 9999px;
+}
+
+.glass-hover {
+	transition:
+		transform 0.25s ease,
+		box-shadow 0.25s ease;
+}
+
+.glass-hover:hover {
+	transform: translateY(-3px);
+	box-shadow:
+		0 14px 40px rgba(31, 38, 135, 0.16),
+		var(--glass-highlight);
+}
+
+.dark .glass-hover:hover {
+	box-shadow:
+		0 14px 40px rgba(0, 0, 0, 0.55),
+		var(--glass-highlight);
+}
+
+.text-muted {
+	color: var(--text-muted);
+}
+
+.accent {
+	color: var(--accent);
+}
+
+/* typography 插件默认给行内代码添加反引号装饰，移除 */
+.prose code::before,
+.prose code::after {
+	content: none !important;
+}
+
+/* Shiki 代码块明暗双主题切换 */
+.astro-code,
+.astro-code span {
+	color: var(--shiki-light);
+	background-color: var(--shiki-light-bg);
+}
+
+.dark .astro-code,
+.dark .astro-code span {
+	color: var(--shiki-dark) !important;
+	background-color: var(--shiki-dark-bg) !important;
+	font-style: inherit !important;
+}
+
+pre.astro-code {
+	padding: 1rem 1.25rem;
+	border-radius: 0.75rem;
+	border: 1px solid var(--glass-border);
+	overflow-x: auto;
+}
+
+/* Gitalk 暗色模式覆盖 */
+.dark #gitalk-container {
+	color: var(--text);
+}
+
+.dark #gitalk-container .gt-container .gt-comment-content,
+.dark #gitalk-container .gt-container .gt-header-textarea,
+.dark #gitalk-container .gt-container .gt-header-preview {
+	background-color: rgba(255, 255, 255, 0.06);
+	color: var(--text);
+}
+
+.dark #gitalk-container .gt-container .gt-comment-body {
+	color: var(--text) !important;
+}
+
+::selection {
+	background: rgba(37, 99, 235, 0.25);
+}
