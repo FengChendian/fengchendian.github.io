@@ -241,7 +241,7 @@ a {
 	background: var(--accent-glow);
 }
 
-/* 归档页片段搜索结果：卡片错落淡入，摘录上下渐隐，只留片段的过渡感 */
+/* 归档页片段搜索结果：卡片错落淡入 */
 .snippet-results {
 	flex-direction: column;
 	gap: 0.75rem;
@@ -287,20 +287,6 @@ a {
 	color: var(--text-dim);
 	max-height: calc(1.75em * 3);
 	overflow: hidden;
-	mask-image: linear-gradient(
-		to bottom,
-		transparent,
-		black 1.1em,
-		black calc(100% - 1.1em),
-		transparent
-	);
-	-webkit-mask-image: linear-gradient(
-		to bottom,
-		transparent,
-		black 1.1em,
-		black calc(100% - 1.1em),
-		transparent
-	);
 }
 
 .snippet-excerpt mark {
