@@ -10,7 +10,6 @@ export default defineConfig({
 	site: 'https://fengchendian.github.io',
 	integrations: [sitemap()],
 	vite: {
-		// @ts-expect-error vite version mismatch between astro and @tailwindcss/vite
 		plugins: [tailwindcss()],
 	},
 	markdown: {

@@ -41,7 +41,7 @@ def find(x):
 如果两个节点有关联，则将其中一个节点的根节点的上级设置为另一个节点的根节点（两个树进行合并）
 
 ```python
-def union(x, y):s
+def union(x, y):
     if root_x != root_y:
         parent[root_x] = root_y
         self.nums -= 1

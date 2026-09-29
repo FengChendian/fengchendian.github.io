@@ -26,7 +26,7 @@ npm run build && npm run preview
 
 Astro 同一项目目录只允许一个 preview 实例。若 `npm run preview` 报 `Another astro preview server is already running`：
 
-- preview 直接读 `dist/` 的文件，**重新 build 后无需重启**，旧实例服务的就是最新内容，直接访问 http://localhost:4321 即可；
+- preview 直接读 `dist/` 的文件，**重新 build 后无需重启**，旧实例服务的就是最新内容，直接访问 <http://localhost:4321> 即可；
 - 或停掉旧实例：`npx astro preview stop`；
 - 或强制替换：`npx astro preview --force`。
 
