@@ -44,39 +44,48 @@ const years = [...postsByYear.keys()].sort((a, b) => b - a);
 		></div>
 	</div>
 
-	{
-		years.map((year) => (
-			<section class="mb-10" data-year={year}>
-				<h3 class="mono accent mb-4 text-lg font-bold">{year}</h3>
-				<ul class="flex flex-col gap-3">
-					{postsByYear.get(year)!.map((post) => (
-						<li data-post-id={post.id}>
-							<a
-								href={`/blog/${post.id}/`}
-								class="card card-hover block px-6 py-4 no-underline"
-							>
-								<div class="flex items-baseline justify-between gap-4">
-									<span class="font-medium" style="color: var(--text)">
-										{post.data.title}
-									</span>
-									<span class="mono text-muted shrink-0 text-xs">
-										<FormattedDate date={post.data.pubDate} />
-									</span>
-								</div>
-								{post.data.tags.length > 0 && (
-									<div class="mt-2.5 flex flex-wrap gap-2">
-										{post.data.tags.map((tag) => (
-											<span class="tag-pill">#{tag}</span>
-										))}
+	<div
+		id="snippet-results"
+		class="snippet-results"
+		style="display: none"
+		aria-live="polite"
+	></div>
+
+	<div id="archive-list">
+		{
+			years.map((year) => (
+				<section class="mb-10" data-year={year}>
+					<h3 class="mono accent mb-4 text-lg font-bold">{year}</h3>
+					<ul class="flex flex-col gap-3">
+						{postsByYear.get(year)!.map((post) => (
+							<li data-post-id={post.id}>
+								<a
+									href={`/blog/${post.id}/`}
+									class="card card-hover block px-6 py-4 no-underline"
+								>
+									<div class="flex items-baseline justify-between gap-4">
+										<span class="font-medium" style="color: var(--text)">
+											{post.data.title}
+										</span>
+										<span class="mono text-muted shrink-0 text-xs">
+											<FormattedDate date={post.data.pubDate} />
+										</span>
 									</div>
-								)}
-							</a>
-						</li>
-					))}
-				</ul>
-			</section>
-		))
-	}
+									{post.data.tags.length > 0 && (
+										<div class="mt-2.5 flex flex-wrap gap-2">
+											{post.data.tags.map((tag) => (
+												<span class="tag-pill">#{tag}</span>
+											))}
+										</div>
+									)}
+								</a>
+							</li>
+						))}
+					</ul>
+				</section>
+			))
+		}
+	</div>
 	<p id="archive-empty" class="mono text-muted hidden text-sm">没有匹配的文章</p>
 
 	<script is:inline>
@@ -85,7 +94,9 @@ const years = [...postsByYear.keys()].sort((a, b) => b - a);
 			const countEl = document.getElementById('archive-count');
 			const emptyEl = document.getElementById('archive-empty');
 			const suggestEl = document.getElementById('tag-suggest');
-			if (!input || !countEl || !emptyEl || !suggestEl) return;
+			const listEl = document.getElementById('archive-list');
+			const resultsEl = document.getElementById('snippet-results');
+			if (!input || !countEl || !emptyEl || !suggestEl || !listEl || !resultsEl) return;
 
 			const items = [...document.querySelectorAll('[data-post-id]')];
 			const sections = [...document.querySelectorAll('[data-year]')];
@@ -93,12 +104,17 @@ const years = [...postsByYear.keys()].sort((a, b) => b - a);
 
 			// 标签直接读列表中已渲染的 .tag-pill，无需内联数据
 			const tagMap = new Map();
+			const titleMap = new Map();
 			for (const li of items) {
 				tagMap.set(
 					li.dataset.postId,
 					[...li.querySelectorAll('.tag-pill')].map((el) =>
 						el.textContent.replace(/^#/, ''),
 					),
+				);
+				titleMap.set(
+					li.dataset.postId,
+					li.querySelector('span.font-medium')?.textContent ?? li.dataset.postId,
 				);
 			}
 
@@ -108,6 +124,8 @@ const years = [...postsByYear.keys()].sort((a, b) => b - a);
 				.then((pf) => (typeof pf.init === 'function' ? pf.init().then(() => pf) : pf))
 				.then((pf) => {
 					pagefind = pf;
+					// 索引异步就绪：若加载期间用户已开始输入，补一次全文检索
+					if (input.value.trim()) applyFilter();
 				})
 				.catch(() => {});
 
@@ -122,12 +140,11 @@ const years = [...postsByYear.keys()].sort((a, b) => b - a);
 				// 其余 token 交给 Pagefind 全文检索（多词为与关系，中文按词切分）
 				const textTokens = tokens.filter((t) => !t.startsWith('#'));
 
-				let textMatch = null;
+				let datas = null;
 				let degraded = false;
 				if (textTokens.length > 0) {
 					if (pagefind) {
 						const seq = ++searchSeq;
-						let datas;
 						try {
 							const res = await pagefind.search(textTokens.join(' '));
 							if (seq !== searchSeq) return; // 已有更新的查询，丢弃过期结果
@@ -137,17 +154,18 @@ const years = [...postsByYear.keys()].sort((a, b) => b - a);
 							// 索引加载失败等异常：退化为仅按标签过滤
 							degraded = true;
 						}
-						if (datas) {
-							textMatch = new Set(
-								datas
-									.map((d) => /^\/blog\/(.+?)\/?$/.exec(d.url)?.[1])
-									.filter(Boolean),
-							);
-						}
 					} else {
 						degraded = true;
 					}
 				}
+
+				const textMatch = datas
+					? new Set(
+							datas
+								.map((d) => /^\/blog\/(.+?)\/?$/.exec(d.url)?.[1])
+								.filter(Boolean),
+						)
+					: null;
 
 				const visible = new Set();
 				for (const li of items) {
@@ -157,21 +175,88 @@ const years = [...postsByYear.keys()].sort((a, b) => b - a);
 					const okTags = tagTokens.every((q) => tags.some((t) => t.includes(q)));
 					if (okText && okTags) visible.add(id);
 				}
-				for (const li of items) {
-					li.classList.toggle('hidden', !visible.has(li.dataset.postId));
+
+				// 全文检索成功时切换为片段视图；否则维持文章列表过滤
+				const snippetMode = !!datas;
+				if (snippetMode) {
+					renderSnippets(datas, visible);
+					listEl.style.display = 'none';
+					resultsEl.style.display = 'flex';
+				} else {
+					resultsEl.style.display = 'none';
+					listEl.style.display = '';
+					for (const li of items) {
+						li.classList.toggle('hidden', !visible.has(li.dataset.postId));
+					}
+					for (const section of sections) {
+						const anyVisible = [...section.querySelectorAll('[data-post-id]')].some(
+							(li) => !li.classList.contains('hidden'),
+						);
+						section.classList.toggle('hidden', !anyVisible);
+					}
 				}
-				for (const section of sections) {
-					const anyVisible = [...section.querySelectorAll('[data-post-id]')].some(
-						(li) => !li.classList.contains('hidden'),
-					);
-					section.classList.toggle('hidden', !anyVisible);
-				}
+
 				countEl.textContent =
 					tokens.length === 0
 						? `共 ${total} 篇文章`
-						: `匹配 ${visible.size} / ${total} 篇文章` +
-							(degraded ? '（dev 模式无全文索引，请先运行 npm run build）' : '');
+						: snippetMode
+							? `匹配 ${visible.size} / ${total} 篇文章 · ${resultsEl.childElementCount} 个片段`
+							: `匹配 ${visible.size} / ${total} 篇文章` +
+								(degraded ? '（dev 模式无全文索引，请先运行 npm run build）' : '');
 				emptyEl.classList.toggle('hidden', visible.size > 0);
+			};
+
+			// ---------- 片段结果视图 ----------
+
+			const MAX_SNIPPETS_PER_POST = 3;
+
+			const buildSnippetCard = (id, sub, index) => {
+				const a = document.createElement('a');
+				a.href = sub.url; // 子结果 URL 带小节锚点，点击直达命中位置
+				a.className = 'card card-hover snippet-card no-underline';
+				a.style.animationDelay = `${Math.min(index, 10) * 45}ms`;
+
+				const source = document.createElement('div');
+				source.className = 'snippet-source';
+				const article = document.createElement('span');
+				article.className = 'snippet-article';
+				article.textContent = titleMap.get(id);
+				source.append(article);
+				if (sub.title && sub.title !== titleMap.get(id)) {
+					const sep = document.createElement('span');
+					sep.textContent = '›';
+					const heading = document.createElement('span');
+					heading.textContent = sub.title;
+					source.append(sep, heading);
+				}
+
+				const excerpt = document.createElement('div');
+				excerpt.className = 'snippet-excerpt';
+				// Pagefind 已对原文做 HTML 转义，仅插入 <mark> 高亮标签
+				excerpt.innerHTML = sub.excerpt;
+
+				a.append(source, excerpt);
+				return a;
+			};
+
+			const renderSnippets = (datas, visible) => {
+				const cards = [];
+				let index = 0;
+				for (const d of datas) {
+					const id = /^\/blog\/(.+?)\/?$/.exec(d.url)?.[1];
+					if (!id || !visible.has(id)) continue;
+					let subs = (d.sub_results ?? []).filter((s) =>
+						s.excerpt?.includes('<mark'),
+					);
+					// 命中在标题等无小节位置时，没有子结果，退化为整页摘录
+					if (subs.length === 0 && d.excerpt?.includes('<mark')) {
+						subs = [{ url: d.url, title: '', excerpt: d.excerpt }];
+					}
+					for (const sub of subs.slice(0, MAX_SNIPPETS_PER_POST)) {
+						cards.push(buildSnippetCard(id, sub, index++));
+					}
+				}
+				resultsEl.replaceChildren(...cards);
 			};
 
 			// ---------- # 标签联想 ----------

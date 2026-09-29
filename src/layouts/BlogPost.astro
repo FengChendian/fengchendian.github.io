@@ -22,12 +22,13 @@ const heroImageSrc = heroImage
 
 <BaseLayout title={`${title} - Yichen's Homepage`} description={description} image={heroImageSrc?.src}>
 	<article class="mx-auto max-w-190 pt-10 pb-16" data-pagefind-body>
-		<a href="/archive" class="mono mb-9 inline-block text-[13px] no-underline">cd ../archive</a>
+		<a href="/archive" class="mono mb-9 inline-block text-[13px] no-underline" data-pagefind-ignore>cd ../archive</a>
 		<header class="mb-10">
 			<h1 class="text-[34px] leading-tight font-extrabold tracking-[-0.5px]">{title}</h1>
 			<div
 				class="mono text-muted mt-3.5 flex flex-wrap items-center gap-x-4 gap-y-2 border-b pb-6 text-[13px]"
 				style="border-color: var(--card-border);"
+				data-pagefind-ignore
 			>
 				<FormattedDate date={pubDate} />
 				{
