@@ -2,11 +2,12 @@
 import { getCollection } from 'astro:content';
 import FormattedDate from '../components/FormattedDate.astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { AUTHOR, SITE_DESCRIPTION, SITE_TITLE } from '../consts';
+import { HOME_POST_COUNT, SITE_DESCRIPTION, SITE_TITLE } from '../consts';
 
 const posts = (await getCollection('blog')).sort(
 	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
 );
+const latestPosts = posts.slice(0, HOME_POST_COUNT);
 
 const readingTime = (body: string | undefined) => Math.max(1, Math.ceil((body?.length ?? 0) / 400));
 ---
@@ -26,7 +27,7 @@ const readingTime = (body: string | undefined) => Math.max(1, Math.ceil((body?.l
 	<h2 class="section-title mb-6">latest posts</h2>
 	<div class="flex flex-col gap-4">
 		{
-			posts.map((post) => (
+			latestPosts.map((post) => (
 				<a href={`/blog/${post.id}/`} class="card card-hover block px-7 py-6 no-underline">
 					<h3 class="mb-1.5 text-xl font-bold" style="color: var(--text)">
 						{post.data.title}
@@ -49,10 +50,13 @@ const readingTime = (body: string | undefined) => Math.max(1, Math.ceil((body?.l
 		}
 	</div>
 
-	<h2 class="section-title mt-14 mb-6">about</h2>
-	<div class="card px-7 py-6">
-		<p class="text-[14.5px]" style="color: var(--text)">
-			{AUTHOR}，南京大学物理学院博士生，研究方向为基于模拟存算硬件的神经网络算法与系统。
-		</p>
-	</div>
+	{
+		posts.length > HOME_POST_COUNT && (
+			<div class="mt-8 flex justify-center">
+				<a href="/archive/" class="btn-accent mono">
+					全部文章 →
+				</a>
+			</div>
+		)
+	}
 </BaseLayout>

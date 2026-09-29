@@ -15,6 +15,8 @@ for (const post of posts) {
 	postsByYear.set(year, list);
 }
 const years = [...postsByYear.keys()].sort((a, b) => b - a);
+
+const readingTime = (body: string | undefined) => Math.max(1, Math.ceil((body?.length ?? 0) / 400));
 ---
 
 <BaseLayout title="归档 - Yichen's Homepage" description="全部文章归档">
@@ -56,23 +58,26 @@ const years = [...postsByYear.keys()].sort((a, b) => b - a);
 			years.map((year) => (
 				<section class="mb-10" data-year={year}>
 					<h3 class="mono accent mb-4 text-lg font-bold">{year}</h3>
-					<ul class="flex flex-col gap-3">
+					<ul class="flex flex-col gap-4">
 						{postsByYear.get(year)!.map((post) => (
 							<li data-post-id={post.id}>
 								<a
 									href={`/blog/${post.id}/`}
-									class="card card-hover block px-6 py-4 no-underline"
+									class="card card-hover block px-7 py-6 no-underline"
 								>
-									<div class="flex items-baseline justify-between gap-4">
-										<span class="font-medium" style="color: var(--text)">
-											{post.data.title}
-										</span>
-										<span class="mono text-muted shrink-0 text-xs">
-											<FormattedDate date={post.data.pubDate} />
-										</span>
+									<h3 class="mb-1.5 text-xl font-bold" style="color: var(--text)">
+										{post.data.title}
+									</h3>
+									<div class="mono text-muted mb-2.5 text-xs">
+										<FormattedDate date={post.data.pubDate} />
+										<span class="mx-2 opacity-50">·</span>
+										<span>{readingTime(post.body)} min read</span>
 									</div>
+									<p class="text-muted line-clamp-2 text-[14.5px]">
+										{post.data.description}
+									</p>
 									{post.data.tags.length > 0 && (
-										<div class="mt-2.5 flex flex-wrap gap-2">
+										<div class="mt-3.5 flex flex-wrap gap-2">
 											{post.data.tags.map((tag) => (
 												<span class="tag-pill">#{tag}</span>
 											))}
@@ -114,7 +119,7 @@ const years = [...postsByYear.keys()].sort((a, b) => b - a);
 				);
 				titleMap.set(
 					li.dataset.postId,
-					li.querySelector('span.font-medium')?.textContent ?? li.dataset.postId,
+					li.querySelector('h3')?.textContent ?? li.dataset.postId,
 				);
 			}
 
