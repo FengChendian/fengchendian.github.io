@@ -1,19 +1,22 @@
 ---
-import { getCollection } from 'astro:content';
+import { getCollection, render } from 'astro:content';
 import FormattedDate from '../components/FormattedDate.astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { HOME_POST_COUNT, SITE_DESCRIPTION, SITE_TITLE } from '../consts';
 
-const posts = (await getCollection('blog')).sort(
-	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+const posts = await Promise.all(
+	(await getCollection('blog'))
+		.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
+		.map(async (post) => ({
+			...post,
+			minutesRead: (await render(post)).remarkPluginFrontmatter.minutesRead as number,
+		})),
 );
 const latestPosts = posts.slice(0, HOME_POST_COUNT);
-
-const readingTime = (body: string | undefined) => Math.max(1, Math.ceil((body?.length ?? 0) / 400));
 ---
 
 <BaseLayout title={SITE_TITLE} description={SITE_DESCRIPTION}>
-	<section class="py-16 sm:pt-24 sm:pb-16">
+	<section class="py-10">
 		<span class="hero-tag mb-6">物理 · 存内计算 · AI Infra</span>
 		<h1 class="text-[clamp(34px,6vw,54px)] leading-[1.15] font-extrabold tracking-[-1px]">
 			<span class="grad">Yichen Zhao</span><br />
@@ -28,14 +31,14 @@ const readingTime = (body: string | undefined) => Math.max(1, Math.ceil((body?.l
 	<div class="flex flex-col gap-4">
 		{
 			latestPosts.map((post) => (
-				<a href={`/blog/${post.id}/`} class="card card-hover block px-7 py-6 no-underline">
+				<a href={`/blog/${post.id}/`} class="card card-hover block px-6 py-6 no-underline">
 					<h3 class="mb-1.5 text-xl font-bold" style="color: var(--text)">
 						{post.data.title}
 					</h3>
 					<div class="mono text-muted mb-2.5 text-xs">
 						<FormattedDate date={post.data.pubDate} />
 						<span class="mx-2 opacity-50">·</span>
-						<span>{readingTime(post.body)} min read</span>
+						<span>{post.minutesRead} min read</span>
 					</div>
 					<p class="text-muted line-clamp-2 text-[14.5px]">{post.data.description}</p>
 					{post.data.tags.length > 0 && (
@@ -54,7 +57,10 @@ const readingTime = (body: string | undefined) => Math.max(1, Math.ceil((body?.l
 		posts.length > HOME_POST_COUNT && (
 			<div class="mt-8 flex justify-center">
 				<a href="/archive/" class="btn-accent mono">
-					全部文章 →
+					<span class="btn-accent-text">
+						<span class="btn-accent-label">全部文章</span>
+						<span class="btn-accent-label btn-accent-label--hover" aria-hidden="true">点击跳转</span>
+					</span>
 				</a>
 			</div>
 		)

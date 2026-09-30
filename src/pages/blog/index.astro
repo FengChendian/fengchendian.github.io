@@ -1,13 +1,16 @@
 ---
-import { getCollection } from 'astro:content';
+import { getCollection, render } from 'astro:content';
 import FormattedDate from '../../components/FormattedDate.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 
-const posts = (await getCollection('blog')).sort(
-	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+const posts = await Promise.all(
+	(await getCollection('blog'))
+		.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
+		.map(async (post) => ({
+			...post,
+			minutesRead: (await render(post)).remarkPluginFrontmatter.minutesRead as number,
+		})),
 );
-
-const readingTime = (body: string | undefined) => Math.max(1, Math.ceil((body?.length ?? 0) / 400));
 ---
 
 <BaseLayout title="文章 - Yichen's Homepage" description="全部文章">
@@ -22,7 +25,7 @@ const readingTime = (body: string | undefined) => Math.max(1, Math.ceil((body?.l
 					<div class="mono text-muted mb-2.5 text-xs">
 						<FormattedDate date={post.data.pubDate} />
 						<span class="mx-2 opacity-50">·</span>
-						<span>{readingTime(post.body)} min read</span>
+						<span>{post.minutesRead} min read</span>
 					</div>
 					<p class="text-muted line-clamp-2 text-[14.5px]">{post.data.description}</p>
 					{post.data.tags.length > 0 && (

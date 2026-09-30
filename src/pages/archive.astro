@@ -1,10 +1,15 @@
 ---
-import { getCollection } from 'astro:content';
+import { getCollection, render } from 'astro:content';
 import FormattedDate from '../components/FormattedDate.astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
 
-const posts = (await getCollection('blog')).sort(
-	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+const posts = await Promise.all(
+	(await getCollection('blog'))
+		.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
+		.map(async (post) => ({
+			...post,
+			minutesRead: (await render(post)).remarkPluginFrontmatter.minutesRead as number,
+		})),
 );
 
 const postsByYear = new Map<number, typeof posts>();
@@ -15,8 +20,6 @@ for (const post of posts) {
 	postsByYear.set(year, list);
 }
 const years = [...postsByYear.keys()].sort((a, b) => b - a);
-
-const readingTime = (body: string | undefined) => Math.max(1, Math.ceil((body?.length ?? 0) / 400));
 ---
 
 <BaseLayout title="归档 - Yichen's Homepage" description="全部文章归档">
@@ -26,7 +29,7 @@ const readingTime = (body: string | undefined) => Math.max(1, Math.ceil((body?.l
 	</p>
 
 	<div class="relative mb-10">
-		<div class="card flex items-center gap-3 px-5 py-3">
+		<div class="card flex items-center gap-5 px-6 py-3">
 			<span class="mono accent select-none text-sm" aria-hidden="true">&gt;</span>
 			<input
 				id="archive-search"
@@ -63,7 +66,7 @@ const readingTime = (body: string | undefined) => Math.max(1, Math.ceil((body?.l
 							<li data-post-id={post.id}>
 								<a
 									href={`/blog/${post.id}/`}
-									class="card card-hover block px-7 py-6 no-underline"
+									class="card card-hover block px-6 py-6 no-underline"
 								>
 									<h3 class="mb-1.5 text-xl font-bold" style="color: var(--text)">
 										{post.data.title}
@@ -71,7 +74,7 @@ const readingTime = (body: string | undefined) => Math.max(1, Math.ceil((body?.l
 									<div class="mono text-muted mb-2.5 text-xs">
 										<FormattedDate date={post.data.pubDate} />
 										<span class="mx-2 opacity-50">·</span>
-										<span>{readingTime(post.body)} min read</span>
+										<span>{post.minutesRead} min read</span>
 									</div>
 									<p class="text-muted line-clamp-2 text-[14.5px]">
 										{post.data.description}

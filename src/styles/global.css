@@ -301,7 +301,7 @@ a {
 .section-title {
 	font-family: 'Maple Mono', 'SF Mono', Consolas, 'PingFang SC', 'Noto Sans SC',
 		'Microsoft YaHei', sans-serif;
-	font-size: 16 px;
+	font-size: 16px;
 	font-weight: 600;
 	color: var(--text-dim);
 	letter-spacing: 2px;
@@ -402,8 +402,11 @@ a {
 }
 
 /* 主按钮：填充主题渐变，文字用底色反衬（明暗主题下均保持对比度） */
+/* hover 时 ::before 叠层淡入切换到紫色渐变，文字上下滑动切换 */
 .btn-accent {
-	display: inline-block;
+	position: relative;
+	display: inline-flex;
+	align-items: center;
 	background: linear-gradient(120deg, var(--accent), var(--accent-2));
 	color: var(--bg);
 	border-radius: 999px;
@@ -417,10 +420,57 @@ a {
 		box-shadow 0.25s ease;
 }
 
+/* hover 渐变叠层：gradient 无法直接过渡，用独立图层淡入 */
+.btn-accent::before {
+	content: '';
+	position: absolute;
+	inset: 0;
+	border-radius: inherit;
+	background: linear-gradient(120deg, #8b5cf6, #d946ef);
+	opacity: 0;
+	transition: opacity 0.35s ease;
+}
+
 .btn-accent:hover {
 	transform: translateY(-2px);
-	box-shadow: 0 8px 28px var(--accent-glow);
+	box-shadow: 0 8px 28px rgba(139, 92, 246, 0.3);
 	color: var(--bg);
+}
+
+.btn-accent:hover::before {
+	opacity: 1;
+}
+
+/* 文字切换：两个标签同格堆叠，hover 时一个上滑淡出、一个下滑淡入 */
+.btn-accent-text {
+	position: relative;
+	display: inline-grid;
+	overflow: hidden;
+}
+
+.btn-accent-label {
+	grid-area: 1 / 1;
+	transition:
+		transform 0.35s ease,
+		opacity 0.35s ease;
+}
+
+/* hover 文字初始位置：藏在按钮下方（正 Y 向下） */
+/* 用 110% 而非 100%：多留 10% 间隙，避免切换时新旧文字首尾相接 */
+.btn-accent-label--hover {
+	transform: translateY(110%);
+	opacity: 0;
+}
+
+/* hover 时旧文字向上滑出（负 Y 向上），与 hover 文字同向滚动 */
+.btn-accent:hover .btn-accent-label {
+	transform: translateY(-110%);
+	opacity: 0;
+}
+
+.btn-accent:hover .btn-accent-label--hover {
+	transform: translateY(0);
+	opacity: 1;
 }
 
 /* 首页 hero 状态标签 */
@@ -519,6 +569,30 @@ a {
 	--tw-prose-invert-pre-bg: var(--code-bg);
 	--tw-prose-invert-th-borders: var(--card-border);
 	--tw-prose-invert-td-borders: var(--card-border);
+}
+
+/* 无序列表圆点居左：弃用原生 marker（outside 时浏览器把它右对齐到文字边缘，inside 时
+   其宽度随字体变化导致换行错位），改用固定尺寸的 ::before 圆点，
+   圆点左缘与正文文字左缘对齐，换行与首行文字严格对齐 */
+.prose ul {
+	list-style: none;
+	padding-left: 0;
+}
+
+.prose ul > li {
+	position: relative;
+	padding-left: 1em;
+}
+
+.prose ul > li::before {
+	content: '';
+	position: absolute;
+	left: 0.05em;
+	top: 0.72em;
+	width: 0.3em;
+	height: 0.3em;
+	border-radius: 50%;
+	background: var(--tw-prose-bullets);
 }
 
 /* 链接下划线整体下移，避开 g、y 等字母降部，保持连续不断线 */

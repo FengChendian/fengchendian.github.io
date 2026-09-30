@@ -7,9 +7,9 @@ import FormattedDate from '../components/FormattedDate.astro';
 import TocFloat from '../components/TocFloat.astro';
 import BaseLayout from './BaseLayout.astro';
 
-type Props = CollectionEntry<'blog'>['data'] & { headings?: MarkdownHeading[] };
+type Props = CollectionEntry<'blog'>['data'] & { headings?: MarkdownHeading[]; minutesRead?: number };
 
-const { title, description, pubDate, updatedDate, heroImage, tags, headings = [] } = Astro.props;
+const { title, description, pubDate, updatedDate, heroImage, tags, headings = [], minutesRead } = Astro.props;
 
 // heroImage 是相对于 src/assets/ 的文件名，在构建时解析为打包后的图片
 const images = import.meta.glob<{ default: ImageMetadata }>('../assets/**/*.{png,jpg,jpeg,webp,gif}', {
@@ -31,6 +31,7 @@ const heroImageSrc = heroImage
 				data-pagefind-ignore
 			>
 				<FormattedDate date={pubDate} />
+				{minutesRead && <span>{minutesRead} min read</span>}
 				{
 					updatedDate && (
 						<span class="italic">
